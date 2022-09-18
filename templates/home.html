@@ -14,12 +14,23 @@
 </head>
 <body>
     <div class="container text-center alert alert-danger my-5">
-        <h2>Here is the list of all the transactions done by you!!</h2>
-
+        <div class="row">
+            <div class="col-lg-8">
+                <h2>Here is the list of all the transactions done by you!!</h2>
+            </div>
+            <div class="col-lg-4">
+                <h3>
+                    Hello, {{user.first_name}} {{user.last_name}}
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'logout' %}" style="text-decoration: none; color:inherit;" class="">Logout</a>
+                    {% endif %}
+                </h3>
+            </div>
+        </div>
     </div>
     <div class="container mt-3">
         <div class="row">
-            <div class="col-4">
+            <div class="col-lg-4 col-sm-12 col-md-12 mb-5">
                 <h4 class="text-center alert alert-info">Add New Transaction</h4>
                 <form method="post">
                     {% csrf_token %}
@@ -27,7 +38,7 @@
                     <button class="btn btn-success" type="submit">Add Transaction</button>
                 </form>
             </div>
-            <div class="col-8">
+            <div class="col-lg-8 col-sm-12 col-md-12 mb-5">
                 <h4 class="text-center alert alert-info">List Of Transactions</h4>
                 <table class="table table-hover" >
                     <thead>
@@ -39,6 +50,7 @@
                             <th scope="col">Type</th>
                             <th scope="col">Category</th>
                             <th scope="col">Date</th>
+                            <th scope="col">Action</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -51,6 +63,14 @@
                             <td>{{objs.transaction_type}}</td>
                             <td>{{objs.category}}</td>
                             <td>{{objs.paid_on.date}}</td>
+                            <td>
+                                <a href="{% url 'delete' pk=objs.id %}">
+                                    <button class="btn btn-danger">Delete</button>
+                                </a>
+                                {% comment %} <form method="get" action="{% url 'update' pk=objs.id %}">
+                                    <button class="btn btn-danger">Update</button>
+                                </form> {% endcomment %}
+                            </td>
                         </tr>
                         {% endfor %}
                     </tbody>

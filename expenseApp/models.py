@@ -1,5 +1,5 @@
 from django.db import models
-
+from django.contrib.auth.models import User
 # Create your models here.
 
 mychoices=(
@@ -18,6 +18,7 @@ transaction_choice=(
 )
 
 class transaction(models.Model):
+    user = models.ForeignKey(to=User ,on_delete=models.CASCADE)
     paid_for = models.CharField(max_length=40, default='Unknown', null=True)
     amount = models.BigIntegerField(null=False)
     transaction_type = models.CharField(max_length=20, choices=transaction_choice, null=False)

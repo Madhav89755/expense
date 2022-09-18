@@ -4,7 +4,7 @@ from .models import transaction
 class transactionForm(forms.ModelForm):  
     class Meta:  
         model = transaction  
-        fields = "__all__"
+        fields = ['paid_for','amount','transaction_type','category']
         widgets={
             'paid_for':forms.TextInput(attrs={'class':'form-control'}),
             'amount':forms.NumberInput(attrs={'class':'form-control'}),
