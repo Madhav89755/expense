@@ -4,28 +4,74 @@ from .forms import transactionForm
 from django.contrib.auth.models import User, auth
 from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
-
+from django.http import JsonResponse
 # Create your views here.
 
 @login_required(login_url="/login/")
 def home(request):
     context={}
     context['frm']=transactionForm()
-    context['transaction_obj']=transaction.objects.filter(user=request.user).order_by('-paid_on')
+    objs=transaction.objects.filter(user=request.user).order_by('-paid_on')
+    context['transaction_obj']=objs
     if request.method=="POST":
-        paid_for = request.POST['paid_for']
-        amount = request.POST['amount']
-        transaction_type = request.POST['transaction_type']
-        category = request.POST['category']
-        newObj=transaction(user=request.user,paid_for=paid_for, amount=amount, transaction_type=transaction_type, category=category)
-        newObj.save()
+        data={}
+        form =transactionForm(request.POST)
+        if form.is_valid():
+            paid_for = request.POST['paid_for']
+            amount = request.POST['amount']
+            transaction_type = request.POST['transaction_type']
+            category = request.POST['category']
+            id=request.POST.get('pk')
+            if id=="":             
+                newObj=transaction(user=request.user,paid_for=paid_for, amount=amount,  transaction_type=transaction_type, category=category)
+                data['status']=200
+                data['message']="Record Saved Successfully"
+            else:
+                newObj=transaction.objects.get(id=id)
+                newObj.paid_for=paid_for
+                newObj.amount=amount
+                newObj.transaction_type=transaction_type
+                newObj.category=category
+                data['status']=200
+                data['message']="Record Updated Successfully"
+            newObj.save()
+            objs=transaction.objects.filter(user=request.user).order_by('-paid_on').values()
+            data['transaction_obj']=list(objs)
+        else:
+            data['status']=202
+            data['message']="Failed To Save Record"
+
+        return JsonResponse(data)
+        
     return render(request,'home.html',context)
 
 @login_required(login_url="/login/")
-def delete_item(request,pk):
-    member = transaction.objects.get(id=pk).delete()
-    print("Item Number ",pk,)
-    return redirect('/')
+def delete_item(request):
+    data={}
+    if request.method=="POST":
+        pk=request.POST['pk']
+        member = transaction.objects.get(id=pk).delete()
+        print("Item Number ",pk,)
+        data['status']=200
+        data['message']="Record Deleted Successfully"
+    else:
+        data['status']=202
+        data['message']="Invalid Request"
+    return JsonResponse(data)
+
+@login_required(login_url="/login/")
+def update_item(request):
+    data={}
+    id=request.GET['pk']
+    try:
+        objs=transaction.objects.get(pk=id)
+        data['obj']={"category":objs.category,"amount":objs.amount,"paid_for":objs.paid_for,"transaction_type":objs.transaction_type}
+        data['status']=200
+    except:
+        data['status']=202
+    return JsonResponse(data)
+
+
 
 def register(request):
     if request.user.is_authenticated:

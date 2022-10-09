@@ -1,82 +1,139 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Home</title>
-    <!-- Latest compiled and minified CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+{% extends 'base.html' %}
+{% block head_text %}Here is the list of all the transactions done by you!!{% endblock head_text %}
+{% block body %}
 
-    <!-- Latest compiled JavaScript -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+<div class="container mt-3">
+    <div class="row">
+        <div class="col-lg-4 col-sm-12 col-md-12 mb-5">
+            <h4 class="text-center alert alert-info">Add New Transaction</h4>
+            <form method="post">
+                <input type="text" hidden name="id" id="record_id" value="">
+                {% csrf_token %}
+                {{ frm.as_p }}
+                <button class="btn btn-success" type="button" id="savebtn">Add Transaction</button>
+            </form>
+        </div>
+        <div class="col-lg-8 col-sm-12 col-md-12 mb-5">
+            <h4 class="text-center alert alert-info">List Of Transactions</h4>
+            <table class="table table-hover">
+                <thead>
+
+                    <tr>
+                        <th scope="col">Id</th>
+                        <th scope="col">Title</th>
+                        <th scope="col">Amount</th>
+                        <th scope="col">Type</th>
+                        <th scope="col">Category</th>
+                        <th scope="col">Date</th>
+                        <th scope="col">Action</th>
+                    </tr>
+                </thead>
+                <tbody id="table_data">
+
+                    {% for objs in transaction_obj %}
+                    <tr>
+                        <th scope="row">{{objs.id}}</th>
+                        <td>{{objs.paid_for}}</td>
+                        <td>{{objs.amount}}</td>
+                        <td>{{objs.transaction_type}}</td>
+                        <td>{{objs.category}}</td>
+                        <td>{{objs.paid_on|date:"Y-m-d" }}</td>
+                        <td>
+                            <button data-sid={{objs.id}} class="btn btn-warning btn-upd">Update</button>
+                            <button data-sid={{objs.id}} class="btn btn-danger btn-del">Delete</button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    //This ajax call is for adding objs
+    $("#savebtn").click(function (){
+        let output=""
+        let pk=$("#record_id").val()
+        let category=$('#category_id').val()
+        let transaction_type=$('#transaction_id').val()
+        let amount=$('#amount_id').val()
+        let paid_for=$('#paid_id').val()
+        let csrfmiddlewaretoken=$('input[name=csrfmiddlewaretoken]').val()
+        if(category=="uncategorized"){
+            $("#message_box").text("Please Select Category");
+        }else if(transaction_type==""){
+            $("#message_box").text("Please Select Transaction Type");
+        }else if(amount==""){
+            $("#message_box").text("Please Enter Amount");
+        }else if(paid_for=="Unknown"){
+            $("#message_box").text("Please Enter Value in Paid For");
+        }else{
+            mydata={csrfmiddlewaretoken:csrfmiddlewaretoken,pk:pk,category:category,transaction_type:transaction_type,amount:amount,paid_for:paid_for}
+            $.ajax({
+                url:"{% url 'home' %}",
+                method:"POST",
+                data:mydata,
+                success:function(data){
+                    let x=data.transaction_obj
+                    if (data.status==200){
+                        $("#message_box").text(data.message);
+                        $("form")[0].reset()
+                        for(objs=0;objs<x.length;objs++){
+                            output+='<tr><th scope="row">'+x[objs].id+'</th><td>'+x[objs].paid_for+'</td><td>'+x[objs].amount+'</td><td>'+x[objs].transaction_type+'</td><td>'+x[objs].category+'</td><td>'+String(x[objs].paid_on).slice(0,10)+'</td><td><button type="button" data-sid='+x[objs].id+' class="btn btn-warning btn-upd">Update</button></td><td><button type="button" data-sid='+x[objs].id+' class="btn btn-danger btn-del">Delete</button></td></tr>'
+                        }
+                        $("#table_data").html(output)
+                    }
+                    else{
+                        $("#message_box").text(data.message);
+                    }
+                }
+            })
+            console.log("btn Clicked");
+        }
+    });
+
+
+    // This ajax call is for deleting objs
+    $("#table_data").on("click",".btn-del",function(){
+        let id=$(this).attr('data-sid')
+        let mythis = this
+        let csrfmiddlewaretoken=$('input[name=csrfmiddlewaretoken]').val()
+        mydata={pk:id,csrfmiddlewaretoken:csrfmiddlewaretoken}
+        $.ajax({
+            url:`{% url 'delete' %}`,
+            method:"POST",
+            data:mydata,
+            success:function(data){
+                $("#message_box").text(data.message);
+                if(data.status==200){
+                    $(mythis).closest("tr").fadeOut()
+                }
+            }
+        })
+    })
     
-</head>
-<body>
-    <div class="container text-center alert alert-danger my-5">
-        <div class="row">
-            <div class="col-lg-8">
-                <h2>Here is the list of all the transactions done by you!!</h2>
-            </div>
-            <div class="col-lg-4">
-                <h3>
-                    Hello, {{user.first_name}} {{user.last_name}}
-                    {% if user.is_authenticated %}
-                        <a href="{% url 'logout' %}" style="text-decoration: none; color:inherit;" class="">Logout</a>
-                    {% endif %}
-                </h3>
-            </div>
-        </div>
-    </div>
-    <div class="container mt-3">
-        <div class="row">
-            <div class="col-lg-4 col-sm-12 col-md-12 mb-5">
-                <h4 class="text-center alert alert-info">Add New Transaction</h4>
-                <form method="post">
-                    {% csrf_token %}
-                    {{ frm.as_p }}
-                    <button class="btn btn-success" type="submit">Add Transaction</button>
-                </form>
-            </div>
-            <div class="col-lg-8 col-sm-12 col-md-12 mb-5">
-                <h4 class="text-center alert alert-info">List Of Transactions</h4>
-                <table class="table table-hover" >
-                    <thead>
-                        
-                        <tr>
-                            <th scope="col">S.No.</th>
-                            <th scope="col">Title</th>
-                            <th scope="col">Amount</th>
-                            <th scope="col">Type</th>
-                            <th scope="col">Category</th>
-                            <th scope="col">Date</th>
-                            <th scope="col">Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-
-                        {% for objs in transaction_obj %}
-                        <tr>
-                            <th scope="row">{{forloop.counter}}</th>
-                            <td>{{objs.paid_for}}</td>
-                            <td>{{objs.amount}}</td>
-                            <td>{{objs.transaction_type}}</td>
-                            <td>{{objs.category}}</td>
-                            <td>{{objs.paid_on.date}}</td>
-                            <td>
-                                <a href="{% url 'delete' pk=objs.id %}">
-                                    <button class="btn btn-danger">Delete</button>
-                                </a>
-                                {% comment %} <form method="get" action="{% url 'update' pk=objs.id %}">
-                                    <button class="btn btn-danger">Update</button>
-                                </form> {% endcomment %}
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-</body>
-</html>
+    // This ajax call is for updating objs
+    $("#table_data").on("click",".btn-upd",function(){
+        let id=$(this).attr('data-sid')
+        // let csrfmiddlewaretoken=$('input[name=csrfmiddlewaretoken]').val()
+        mydata={pk:id}
+        $.ajax({
+            url:`{% url 'update' %}`,
+            method:"GET",
+            data:mydata,
+            success:function(data){
+                $("#message_box").text(data.message);
+                if (data.status==200){
+                    $("#paid_id").val(data.obj.paid_for)
+                    $("#amount_id").val(data.obj.amount)
+                    $("#transaction_id").val(data.obj.transaction_type)
+                    $("#category_id").val(data.obj.category)
+                    $("#record_id").val(id)
+                }
+            }
+        })
+    })
+    
+</script>
+{% endblock body %}
