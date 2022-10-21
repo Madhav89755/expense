@@ -3,14 +3,14 @@ from django.contrib.auth.models import User
 # Create your models here.
 
 mychoices=(
+    ('loan-repayment','loan-repayment'),
+    ('loan-given','loan-given'),
     ('uncategorized','uncategorized'),
     ('food','food'),
-    ('snacks','snacks'),
-    ('drinks','drinks'),
     ('travel','travel'),
-    ('needs','needs'),
     ('salary','salary'),
-    ('income','income')
+    ('income','income'),
+    ('invoice-payment','inovice-payment')
 )
 transaction_choice=(
     ('added','added'),

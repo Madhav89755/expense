@@ -1,0 +1,226 @@
+{% extends 'base.html' %}
+{% block head_text %}Transaction Summary{% endblock head_text %}
+{% block body %}
+
+<!-- Javascript cdn for apexcharts -->
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+
+<div class="container mt-3">
+    <div class="row">
+        <div class="col-lg-9 col-sm-12 col-md-12 mb-5">
+            <!-- <h4 class="text-center alert alert-info">Transactions</h4> -->
+            {% comment %}
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th scope="col">Id</th>
+                        <th scope="col">Title</th>
+                        <th scope="col">Amount</th>
+                        <th scope="col">Type</th>
+                        <th scope="col">Category</th>
+                        <th scope="col">Date</th>
+                        <th scope="col">Action</th>
+                    </tr>
+                </thead>
+                <tbody id="table_data">
+
+                    {% for objs in exp_obj %}
+                    <tr>
+                        <form method="post" action="">
+                        {% csrf_token %}
+                            <th scope="row">{{objs.id}}</th>
+                            <td><input class="w-7    m-0 form-control" type="text" value="{{objs.paid_for}}"></td>
+                            <td><input class="w-7    m-0 form-control" type="number" value="{{objs.amount}}"></td>
+                            <td><input class="w-7    m-0 form-control" type="text" value="{{objs.transaction_type}}"></td>
+                            <td><input class="w-7    m-0 form-control" type="text" value="{{objs.category}}"></td>
+                            <td>{{objs.paid_on|date:"Y-m-d" }}</td>
+                            <td>
+                                <button type="button" data-sid={{objs.id}} id="edit_{{objs.id}}" onclick="" class="btn btn-primary btn-edit" onclick="click_edit('{{objs.id}}')">Edit</button>
+                                <button data-sid={{objs.id}} id="upd_{{objs.id}}" class="btn btn-warning btn-upd" style="display:none">Update</button>
+                                <button data-sid={{objs.id}} class="btn btn-danger btn-del">Delete</button>
+                            </td>
+                        </form>
+
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% endcomment %}
+
+            <!-- this is for charts for visualizing credit and debit report -->
+            <div id="chart" class="bg-dark w-75 mx-auto my-5 d-flex justify-content-center">
+            </div>
+
+        </div>
+
+        <script>
+
+            let obj=[{% for x in debit_objs %}{x:'{{x.paid_on|safe}}', y:{{x.amount|safe}} },{% endfor %}];
+            let obj2=[{% for x in credit_objs %}{x:'{{x.paid_on|safe}}', y:{{x.amount|safe}} },{% endfor %}];
+            var options = {
+            chart: {
+              height: 350,
+              type: "line",
+              stacked: false,
+              toolbar:{
+                show:true
+              }
+            },
+            title: {
+                text: "Debit and Credits per Day",
+                align: 'left',
+                margin: 10,
+                offsetX: 0,
+                offsetY: 0,
+                floating: false,
+                style: {
+                  fontSize:  '14px',
+                  fontWeight:  'bold',
+                  fontFamily:  undefined,
+                  color:  'white'
+                },
+            },
+            dataLabels: {
+              enabled: false
+            },
+            colors: ["#FF1654", "#247BA0"],
+            series: [
+              {
+                name: "Debit",
+                data: obj
+              },
+              {
+                name: "Credit",
+                data: obj2
+              }
+            ],
+            xaxis: {
+               type: 'datetime'
+            },
+            stroke: {
+              width: [4, 4]
+            },
+            markers: {
+                size: 4,
+                strokeColors: '#fff',
+                strokeWidth: 2,
+                strokeOpacity: 0.9,
+                strokeDashArray: 0,
+                fillOpacity: 1,
+                discrete: [],
+                shape: "circle",
+                radius: 2,
+                offsetX: 0,
+                offsetY: 0,
+                onClick: undefined,
+                onDblClick: undefined,
+                showNullDataPoints: true,
+                hover: {
+                  size: undefined,
+                  sizeOffset: 3
+                }
+            },
+            plotOptions: {
+              bar: {
+                columnWidth: "20%"
+              }
+            },
+            yaxis: [
+              {
+                axisTicks: {
+                  show: true
+                },
+                axisBorder: {
+                  show: true,
+                  color: "#FF1654"
+                },
+                labels: {
+                  style: {
+                    colors: "#FF1654"
+                  }
+                },
+                title: {
+                  text: "Debit",
+                  style: {
+                    color: "#FF1654"
+                  },
+                  floating:true,
+                }
+              },
+              {
+                opposite: true,
+                axisTicks: {
+                  show: true
+                },
+                axisBorder: {
+                  show: true,
+                  color: "#247BA0"
+                },
+                labels: {
+                  style: {
+                    colors: "#247BA0"
+                  }
+                },
+                title: {
+                  text: "Credit",
+                  style: {
+                    color: "#247BA0"
+                  },
+                  floating:true,
+                }
+              }
+            ],
+            tooltip: {
+              enabled: true,
+              x: {
+                show: true
+              },
+              y:{
+                show:true,
+                text:'debit'
+              }
+            },
+            legend: {
+              horizontalAlign: "left",
+              offsetX: 40
+            }
+          };
+          
+          var chart = new ApexCharts(document.querySelector("#chart"), options);
+          
+          chart.render();
+          
+        </script>
+
+
+        <div class="col-lg-3 col-sm-12 col-md-12 mb-5">
+
+            <!-- <h4 class="text-center alert alert-info">Data Summary </h4> -->
+            <div class="w-100 text-light py-5 px-3 bg-dark container">
+                <ul style="list-style-type: none; margin:0">
+                    <div class="w-100 text-white mb-2"><h4>Transactions:</h4></div>
+                    <li class="w-75">
+                        <div class="w-100"><h5>Total Amount Withdrawn:</h5></div>
+                        <div class="w-100 d-flex justify-content-end"><h6>{{total_amount_debit}}</h6></div>
+                    </li>
+                    <li class="w-75">
+                        <div class="w-100"><h5>Total Amount Credited:</h5></div>
+                        <div class="w-100 d-flex justify-content-end"><h6>{{total_amount_added}}</h6></div>
+                    </li>
+                    <li class="w-75">
+                        <div class="w-100"><h5>Total Amount Saved:</h5></div>
+                        <div class="w-100 d-flex justify-content-end"><h6>{{saving}}</h6></div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    $(document).ready(function () {
+        $("#summary").addClass('active_link')
+    })
+</script>
+{% endblock body %}

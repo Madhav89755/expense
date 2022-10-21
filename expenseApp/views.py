@@ -5,6 +5,7 @@ from django.contrib.auth.models import User, auth
 from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
+from django.db.models import Sum
 # Create your views here.
 
 @login_required(login_url="/login/")
@@ -86,22 +87,34 @@ def register(request):
             password1=request.POST['password1']
             password2=request.POST['password2']
             if User.objects.filter(username=username).exists():
-                context['message']='Username already exists please try another one!!!'
+                context["status"]=202
+                context["message"]="Username already exists please try another one!!!"
             else:
                 if User.objects.filter(email=email).exists():
+                    context['status']=202
                     context['message']='Email already exists please try another one!!!'
                 else:
                     if password1==password2:
                         uss = User.objects.create_user(username=username, first_name=first_name, last_name=last_name, email=email, password=password1)
                         uss.email = request.POST.get('username')
                         uss.save()
-                        context['message']='User Registered Successfully Login to Proceed'
+                        context["status"]=200
+                        context["message"]="User Registered Successfully Login to Proceed"
                     else:
-                        context['message']='Passwords Do not match please Try Again'
-        return render(request,'login.html',context)
+                        context["status"]=202
+                        context["message"]="Passwords Do not match please Try Again"
+            return JsonResponse(context)
+        else:
+            return render(request,'login.html',context)
 
 
-    pass
+def username_check(request):
+    if request.method=="POST":
+        username=request.POST['username']
+        if User.objects.filter(username=username).exists():
+            return JsonResponse({"status":200,"message":"This username already exists exists"})
+        return JsonResponse({"status":202})
+
 
 def login(request):
     context={}
@@ -123,3 +136,32 @@ def login(request):
 def logout_user(request):
     logout(request)
     return render(request,'login.html',{'message':'User Logged Out Successfully'})
+
+@login_required(login_url="/login/")
+def summary(request):
+    context={}
+    exp_obj=transaction.objects.all()
+    abc_obj=exp_obj.values("paid_on__date").distinct("paid_on__date")
+    context['exp_obj_transaction']=list(str(x['paid_on__date']) for x in abc_obj)
+    
+    # debit
+    debit_objs=exp_obj.filter(transaction_type="debit").values("paid_on__date").annotate(Sum('amount'))
+    context['debit_objs']=list({'paid_on': x['paid_on__date'], 'amount': x['amount__sum']} for x in debit_objs)
+    
+    # total amount debited
+    debit_total_objs=debit_objs.values('amount').aggregate(Sum('amount'))
+    context['total_amount_debit']=debit_total_objs['amount__sum']
+
+    # credit
+    credit_objs=exp_obj.filter(transaction_type="added").values("paid_on__date").annotate(Sum('amount'))
+    context['credit_objs']=list({'paid_on': x['paid_on__date'], 'amount': x['amount__sum']} for x in credit_objs)
+    
+    # total amount added
+    added_total_objs=credit_objs.values('amount').aggregate(Sum('amount'))
+    context['total_amount_added']=added_total_objs['amount__sum']
+
+    # total savings
+    context['saving']=added_total_objs['amount__sum']-debit_total_objs['amount__sum']
+
+
+    return render(request,'summary.html',context)

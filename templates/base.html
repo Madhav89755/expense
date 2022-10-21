@@ -12,7 +12,14 @@
     <!-- Latest compiled JavaScript and Jquery -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-
+    <style>
+        .active_link{
+            display: block;
+            border-bottom: 5px solid rgba(255, 251, 0, 0.717);
+            border-radius: 20px;
+            color: white !important;
+        }
+    </style>
 </head>
 
 <body>
@@ -29,12 +36,16 @@
             <div class="container">
                 <ul class="navbar-nav justify-content-end">
                     <li class="nav-item">
-                        <h3><a class="nav-link" href="#">Expenses</a></h3>
+                        <h3 class="pb-2" id="expenses"><a class="nav-link" href="{% url 'home' %}">Expenses</a></h3>
+                    </li>
+                    <li class="nav-item">
+                        <h3 class="pb-2" id="summary"><a class="nav-link" href="{% url 'summary_expense' %}">Summary</a></h3>
                     </li>
                     <li class="nav-item dropdown">
-                        <h3 class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown">Hello, {{user.first_name}} {{user.last_name}}</h3>
+                        <h3 class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown">Profile</h3>
                         <ul class="dropdown-menu">
-                          <li><a class="dropdown-item" href="#">Profile</a></li>
+                          <li><a class="dropdown-item" href="#"></a></li>
+                          <li><a class="dropdown-item" href="#">Hello, {{user.first_name}} {{user.last_name}}</a></li>
                           <li><a class="dropdown-item" href="{% url 'logout' %}">Logout</a></li>
                         </ul>
                       </li>
