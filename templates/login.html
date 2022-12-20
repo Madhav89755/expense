@@ -34,7 +34,7 @@
             </div>
             <div class="col-lg-8 col-md-12 col-sm-12 my-3">
                 <h4 class="text-center alert alert-info">Enter Your Details to Registraion</h4>
-                <form>
+                <form action="{% url 'register' %}" method="post">
                     {% csrf_token %}
                     <input type="text" name="first_name" id="first_name_register" class="form-control my-3" placeholder="Enter First Name">
                     <input type="text" name="last_name" id="last_name_register" class="form-control my-3" placeholder="Enter Last Name">
@@ -42,7 +42,7 @@
                     <input type="text" name="email" id="email_register" class="form-control my-3" placeholder="Enter Email">
                     <input type="password" name="password1" id="password1_register" class="form-control my-3" placeholder="Enter Password">
                     <input type="password" name="password2" id="password2_register" class="form-control my-3" placeholder="Enter Password">
-                    <button class="btn btn-success" type="button" id="button_register">Register</button>
+                    <button class="btn btn-success" type="submit" id="button_register">Register</button>
                 </form>
             </div>
         </div>
@@ -77,46 +77,6 @@
                 })
             }
         })
-
-        // This call is to register user in the database
-        $("#button_register").click(function(){
-            let csrfmiddlewaretoken=$('input[name=csrfmiddlewaretoken]').val()
-            let first_name=$("#first_name_register").val()
-            let last_name=$("#last_name_register").val()
-            let username=$("#username_register").val()
-            let email=$("#email_register").val()
-            let password1=$("#password1_register").val()
-            let password2=$("#password2_register").val()
-            let field=""
-            if (first_name=""){
-                field+="First Name"
-            }else if (last_name=""){
-                field+="Last Name"
-            }else if (username=""){
-                field+="Username"
-            }else if (email=""){
-                field+="Email"
-            }else if (password1=""){
-                field+="Password"
-            }else if (password2=""){
-                field+="Re-Password"
-            }else{
-                console.log("password")
-                $.ajax({
-                    url:"{% url 'register' %}",
-                    method:"POST",
-                    data:{first_name:first_name,last_name:last_name,username:username,email:email,password1:password1,password2:password2,username:username,csrfmiddlewaretoken:csrfmiddlewaretoken},
-                    success:function(data){
-                        if (data.status==200){
-                            $("#message_box").text(data.message)
-                        }else{
-                            $("#message_box").text(data.message)
-                        }
-                    }
-                })
-            }
-        })
-
 
     </script>
 </body>

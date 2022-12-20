@@ -103,9 +103,7 @@ def register(request):
                     else:
                         context["status"]=202
                         context["message"]="Passwords Do not match please Try Again"
-            return JsonResponse(context)
-        else:
-            return render(request,'login.html',context)
+        return render(request,'login.html',context)
 
 
 def username_check(request):
