@@ -157,9 +157,11 @@ def summary(request):
     # total amount added
     added_total_objs=credit_objs.values('amount').aggregate(Sum('amount'))
     context['total_amount_added']=added_total_objs['amount__sum']
-
     # total savings
-    context['saving']=added_total_objs['amount__sum']-debit_total_objs['amount__sum']
+    if debit_total_objs['amount__sum']==None:
+        context['saving']=added_total_objs['amount__sum']
+    else:
+        context['saving']=added_total_objs['amount__sum']-int(debit_total_objs['amount__sum'])
 
 
     return render(request,'summary.html',context)
