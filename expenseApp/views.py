@@ -161,8 +161,10 @@ def summary(request):
     if debit_total_objs['amount__sum']==None:
         context['saving']=added_total_objs['amount__sum']
     else:
-        amount_sum=0
-        context['saving']=amount_sum-int(debit_total_objs['amount__sum'])
+        try:
+            context['saving']=added_total_objs['amount__sum']-int(debit_total_objs['amount__sum'])
+        except:
+            context['saving']=None
 
 
     return render(request,'summary.html',context)
