@@ -138,7 +138,7 @@ def logout_user(request):
 @login_required(login_url="/login/")
 def summary(request):
     context={}
-    exp_obj=transaction.objects.all()
+    exp_obj=transaction.objects.filter(user=request.user.id)
     abc_obj=exp_obj.values("paid_on__date").distinct("paid_on__date")
     context['exp_obj_transaction']=list(str(x['paid_on__date']) for x in abc_obj)
     
