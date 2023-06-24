@@ -29,6 +29,6 @@ jobs:
       run: |
         python manage.py makemigrations
         python manage.py migrate
-    - name: Run Server
+    - name: Run test
       run: |
-        python manage.py runserver
+        python manage.py test
