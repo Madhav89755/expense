@@ -24,8 +24,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-$xf&!+r@7ubql^_73d1+l48a&up$x)_93xuvl4=_y7bde_^o58'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-# DEBUG = config('DEBUG')
+# DEBUG = True
+DEBUG = config('DEBUG')
 
 ALLOWED_HOSTS = ['*']
 
@@ -76,24 +76,24 @@ WSGI_APPLICATION = 'expense.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
-
-
 # DATABASES = {
 #     'default': {
-#         'ENGINE': config('DB_VAR_ENGINE'),
-#         'NAME': config('DB_VAR_NAME'),                      
-#         'USER': config('DB_VAR_USER'),
-#         'PASSWORD': config('DB_VAR_PASSWORD'),
-#         'HOST': config('DB_VAR_HOST'),
-#         'PORT': config('DB_VAR_PORT'),
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
 #     }
 # }
+
+
+DATABASES = {
+    'default': {
+        'ENGINE': config('DB_VAR_ENGINE'),
+        'NAME': config('DB_VAR_NAME'),                      
+        'USER': config('DB_VAR_USER'),
+        'PASSWORD': config('DB_VAR_PASSWORD'),
+        'HOST': config('DB_VAR_HOST'),
+        'PORT': config('DB_VAR_PORT'),
+    }
+}
 
 # Password validation
 # https://docs.djangoproject.com/en/4.0/ref/settings/#auth-password-validators
