@@ -5,6 +5,9 @@ class transactionForm(forms.ModelForm):
     class Meta:  
         model = transaction  
         fields = ['paid_for','amount','transaction_type','category']
+        labels = {
+            'paid_for':'Title'
+        }
         widgets={
             'paid_for':forms.TextInput(attrs={'class':'form-control','id':'paid_id'}),
             'amount':forms.NumberInput(attrs={'class':'form-control','id':'amount_id'}),

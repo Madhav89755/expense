@@ -19,7 +19,7 @@
                 <thead>
 
                     <tr>
-                        <th scope="col">Id</th>
+                        <th scope="col" style='display:none'>Id</th>
                         <th scope="col">Title</th>
                         <th scope="col">Amount</th>
                         <th scope="col">Type</th>
@@ -32,11 +32,11 @@
 
                     {% for objs in transaction_obj %}
                     <tr>
-                        <th scope="row">{{objs.id}}</th>
+                        <th scope="row" style='display:none'>{{objs.id}}</th>
                         <td>{{objs.paid_for}}</td>
                         <td>{{objs.amount}}</td>
-                        <td>{{objs.transaction_type}}</td>
-                        <td>{{objs.category}}</td>
+                        <td>{{objs.relevant_transaction_type}}</td>
+                        <td>{{objs.relevant_transaction_category}}</td>
                         <td>{{objs.paid_on|date:"Y-m-d" }}</td>
                         <td>
                             <button data-sid={{objs.id}} class="btn btn-warning btn-upd">Update</button>
@@ -51,6 +51,45 @@
 </div>
 
 <script>
+
+    function getTransactionCategory(category){
+        const TRANSACTION_CATEGORY_CHOICE_FD='FD'
+        const TRANSACTION_CATEGORY_CHOICE_FOOD='Food'
+        const TRANSACTION_CATEGORY_CHOICE_GROCERY='Grocery'
+        const TRANSACTION_CATEGORY_CHOICE_INCOME='Income'
+        const TRANSACTION_CATEGORY_CHOICE_INVOICE_PAYMENT='Invoice Payment'
+        const TRANSACTION_CATEGORY_CHOICE_LOAN_GIVEN='Loan Given'
+        const TRANSACTION_CATEGORY_CHOICE_LOAN_REPAYMENT='Loan Repayment'
+        const TRANSACTION_CATEGORY_CHOICE_RD='RD'
+        const TRANSACTION_CATEGORY_CHOICE_RECHARGE='Recharge'
+        const TRANSACTION_CATEGORY_CHOICE_SALARY='Salary'
+        const TRANSACTION_CATEGORY_CHOICE_SHOPPING='Shopping'
+        const TRANSACTION_CATEGORY_CHOICE_TRAVEL='Travel'
+        const TRANSACTION_CATEGORY_CHOICE_UNCATEGORIZED='Uncategorized'
+        const DEBIT='DEBIT'
+        const CREDIT='CREDIT'
+        
+        const transaction_category={
+            'added':CREDIT,
+            'debit':DEBIT,
+            'fd':TRANSACTION_CATEGORY_CHOICE_FD,
+            'food':TRANSACTION_CATEGORY_CHOICE_FOOD,
+            'grocery':TRANSACTION_CATEGORY_CHOICE_GROCERY,
+            'income':TRANSACTION_CATEGORY_CHOICE_INCOME,
+            'invoice_payment':TRANSACTION_CATEGORY_CHOICE_INVOICE_PAYMENT,
+            'loan_given':TRANSACTION_CATEGORY_CHOICE_LOAN_GIVEN,
+            'loan_repayment':TRANSACTION_CATEGORY_CHOICE_LOAN_REPAYMENT,
+            'rd':TRANSACTION_CATEGORY_CHOICE_RD,
+            'recharge':TRANSACTION_CATEGORY_CHOICE_RECHARGE,
+            'salary':TRANSACTION_CATEGORY_CHOICE_SALARY,
+            'shopping':TRANSACTION_CATEGORY_CHOICE_SHOPPING,
+            'travel':TRANSACTION_CATEGORY_CHOICE_TRAVEL,
+            'uncategorized':TRANSACTION_CATEGORY_CHOICE_UNCATEGORIZED,
+        }
+        return transaction_category[category]
+    }
+
+
     //This ajax call is for adding objs
     $("#savebtn").click(function (){
         let output=""
@@ -80,7 +119,7 @@
                         $("#message_box").text(data.message);
                         $("form")[0].reset()
                         for(objs=0;objs<x.length;objs++){
-                            output+='<tr><th scope="row">'+x[objs].id+'</th><td>'+x[objs].paid_for+'</td><td>'+x[objs].amount+'</td><td>'+x[objs].transaction_type+'</td><td>'+x[objs].category+'</td><td>'+String(x[objs].paid_on).slice(0,10)+'</td><td><button type="button" data-sid='+x[objs].id+' class="btn btn-warning btn-upd">Update</button></td><td><button type="button" data-sid='+x[objs].id+' class="btn btn-danger btn-del">Delete</button></td></tr>'
+                            output+='<tr><th scope="row" style="display:none">'+x[objs].id+'</th><td>'+x[objs].paid_for+'</td><td>'+x[objs].amount+'</td><td>'+getTransactionCategory(x[objs].transaction_type)+'</td><td>'+getTransactionCategory(x[objs].category)+'</td><td>'+String(x[objs].paid_on).slice(0,10)+'</td><td><button type="button" data-sid='+x[objs].id+' class="btn btn-warning btn-upd">Update</button></td><td><button type="button" data-sid='+x[objs].id+' class="btn btn-danger btn-del">Delete</button></td></tr>'
                         }
                         $("#table_data").html(output)
                     }
@@ -127,8 +166,8 @@
                 if (data.status==200){
                     $("#paid_id").val(data.obj.paid_for)
                     $("#amount_id").val(data.obj.amount)
-                    $("#transaction_id").val(data.obj.transaction_type)
-                    $("#category_id").val(data.obj.category)
+                    $("#transaction_id").val(getTransactionCategory(data.obj.transaction_type))
+                    $("#category_id").val(getTransactionCategory(data.obj.category))
                     $("#record_id").val(id)
                 }
             }
