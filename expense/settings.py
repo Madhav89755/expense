@@ -25,7 +25,7 @@ SECRET_KEY = config('DJ_SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 # DEBUG = True
-DEBUG = config('DEBUG')
+DEBUG = config('DEBUG', False)
 
 ALLOWED_HOSTS = ['*']
 
